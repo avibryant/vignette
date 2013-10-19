@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+require 'lib/rumour'
+
+port = ARGV.shift.to_i
+seed = ARGV.shift.to_i
+if port == 0 || seed == 0
+  puts "Usage: rumourd [port] [seed]"
+  exit(1)
+end
+
+Rumour.start(port, seed)

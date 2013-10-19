@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+require 'lib/rumour'
+
+seed = ARGV.shift.to_i
+key = ARGV.shift
+times = ARGV.shift.to_i
+
+Rumour.inject(seed, key, times)

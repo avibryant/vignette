@@ -1,8 +1,26 @@
 #!/usr/bin/env ruby
+$:.unshift(File.dirname(__FILE__))
 require 'lib/rumour'
 
-seed = ARGV.shift.to_i
-key = ARGV.shift
-times = ARGV.shift.to_i
+if __FILE__ == $0
 
-Rumour.inject(seed, key, times)
+module Rumour
+  class Tracer
+    def initialize
+      @node = Node.new
+    end
+
+    def receive(envelope, from)
+      puts "Receiving #{envelope} from #{from}"
+      @node.receive(envelope, from) do |e,t|
+        puts "Sending #{e} to #{t}"
+      end
+    end
+  end
+
+  tracer = Tracer.new
+  addr1 = Address.new("localhost", 1)
+  addr2 = Address.new("localhost", 2)
+  tracer.receive(Envelope.new(addr1, 5, Message.new("foo", 0=>1, 1=>1)), addr2)
+  tracer.receive(Envelope.new(addr1, 5, Message.new("foo", 0=>0, 1=>2)), addr1)
+end

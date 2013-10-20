@@ -2,25 +2,16 @@
 $:.unshift(File.dirname(__FILE__))
 require 'lib/rumour'
 
-if __FILE__ == $0
+include Rumour
 
-module Rumour
-  class Tracer
-    def initialize
-      @node = Node.new
-    end
+port = ARGV.shift.to_i
+seed = ARGV.shift.to_i
 
-    def receive(envelope, from)
-      puts "Receiving #{envelope} from #{from}"
-      @node.receive(envelope, from) do |e,t|
-        puts "Sending #{e} to #{t}"
-      end
-    end
-  end
-
-  tracer = Tracer.new
-  addr1 = Address.new("localhost", 1)
-  addr2 = Address.new("localhost", 2)
-  tracer.receive(Envelope.new(addr1, 5, Message.new("foo", 0=>1, 1=>1)), addr2)
-  tracer.receive(Envelope.new(addr1, 5, Message.new("foo", 0=>0, 1=>2)), addr1)
+daemon = Daemon.new(Address.new("0.0.0.0", port))
+daemon.bootstrap(Address.new("127.0.0.1", seed))
+daemon.start
+loop do
+  n = rand(1000)
+  daemon.update("foo", {0=>n})
+  sleep(1)
 end

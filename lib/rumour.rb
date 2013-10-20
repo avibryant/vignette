@@ -1,6 +1,9 @@
-require 'lib/structs'
-require 'lib/node'
-require 'lib/cache'
+require 'socket'
 
-module Rumour
-end
+require 'lib/cache'
+require 'lib/connection'
+require 'lib/daemon'
+require 'lib/node'
+require 'lib/protocol'
+require 'lib/structs'
+

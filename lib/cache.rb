@@ -9,7 +9,7 @@ module Rumour
         current.merge!(message)
       else
         @messages[message.key] = message
-        message
+        [message, nil]
       end
     end
   end

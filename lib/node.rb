@@ -1,47 +1,37 @@
 module Rumour
   class Node
-    def initialize
+    def initialize(&send)
       @cache = Cache.new
       @neighbours = {}
+      @send = send
     end
 
-    #takes an Envelope and the Address of the immediate sender
-    #yields pairs of Envelope, Address that should be sent
     def receive(envelope, from_address)
-      update_neighbours(from_address)
-      to_forward = update_cache(envelope)
-      if(to_forward)
-        pick_recipients(from_address, envelope.source).each do |forward_to|
-          yield(to_forward, forward_to)
+      @neighbours[from_address] = Time.now
+      forward_msg, backward_msg = @cache.update(envelope.message)
+
+      if forward_msg
+        candidates = @neighbours.keys - [from_address, envelope.source]
+        neighbour = candidates.shuffle[0]
+        if neighbour
+          forward = Envelope.new(
+            envelope.source,
+            envelope.ttl - 1,
+            forward_msg)
+          @send.call(forward, neighbour)
         end
       end
-    end
 
-    private
-
-    def update_neighbours(address)
-      @neighbours[address] = Time.now
-    end
-
-    def update_cache(envelope)
-      updated_message = @cache.update(envelope.message)
-      if updated_message
-        Envelope.new(
+      if backward_msg
+        backward = Envelope.new(
           envelope.source,
-          envelope.ttl - 1,
-          updated_message)
+          envelope.ttl,
+          backward_msg)
+        @send.call(backward, from_address)
+        if from_address != envelope.source
+          @send.call(backward, envelope.source)
+        end
       end
-    end
-
-    def pick_recipients(from_address, source_address)
-      recipients = [from_address, source_address]
-      neighbour_candidates = @neighbours.keys - recipients
-      recipients << pick_neighbour(neighbour_candidates)
-      recipients.compact.uniq
-    end
-
-    def pick_neighbour(candidates)
-      candidates.shuffle[0]
     end
   end
 end

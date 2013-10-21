@@ -29,12 +29,16 @@ module Rumour
       @actor.update(Message.new(key, vector, TTL), @local_address)
     end
 
+    def lookup(key)
+      @actor.lookup(key)
+    end
+
     def bootstrap(remote_address)
       @actor.bootstrap(remote_address)
     end
 
     def log(message, action, address)
-      puts "#{message} #{action} #{address}"
+#      puts "#{message} #{action} #{address}"
     end
   end
 end

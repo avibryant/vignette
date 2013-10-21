@@ -10,8 +10,11 @@ seed = ARGV.shift
 daemon = Daemon.new(address)
 daemon.bootstrap(seed)
 daemon.start
+id = rand(10)
+i = 1
 loop do
-  n = rand(1000)
-  daemon.update("foo", {0=>n})
+  daemon.update("count", {id=>i})
   sleep(1)
+  puts "COUNT: #{daemon.lookup("count").values.inject(0){|a,b| a+b}}"
+  i += 1
 end

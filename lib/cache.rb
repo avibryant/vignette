@@ -8,6 +8,10 @@ module Rumour
       @store.keys
     end
 
+    def lookup(key)
+      @store[key] || {}
+    end
+
     def query(key, vector)
 #      puts "Query: #{key}: #{vector.inspect}"
       case key
@@ -53,7 +57,7 @@ module Rumour
     end
 
     def update(key, vector)
-      return {} if key =~ /%/
+      return {} if key =~ /%/ || vector.empty?
       if(current = @store[key])
         updates = {}
         vector.each do |i,n|

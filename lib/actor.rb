@@ -34,6 +34,10 @@ module Rumour
       end
     end
 
+    def lookup(key)
+      @cache.lookup(key)
+    end
+
     def pick_neighbour(exclude)
       candidates = neighbours - [exclude, @address]
       candidates.shuffle[0]

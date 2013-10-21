@@ -1,12 +1,12 @@
 module Rumour
   class Daemon
-    TTL = 3
+    TTL = 5
 
     def initialize(address)
       @local_address = address
       @connection = UDPConnection.new(@local_address, MarshalProtocol.new)
-      @node = Node.new do |envelope,addr|
-        unless(addr == @local_address)
+      @node = Node.new(@local_address) do |envelope,addr|
+        unless(addr == @local_address || envelope.ttl <= 0)
           log(envelope, "->", addr)
           @connection.send_to(envelope, addr)
         end
@@ -32,10 +32,7 @@ module Rumour
     end
 
     def bootstrap(remote_address)
-      message = Message.new("bootstrap", {0 => 0})
-      envelope = Envelope.new(@local_address, TTL, message)
-      @node.receive(envelope, remote_address)
-      update("bootstrap", {0 => 1})
+      @node.bootstrap(remote_address)
     end
 
     def log(envelope, action, address)

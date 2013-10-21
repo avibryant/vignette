@@ -1,4 +1,4 @@
-module Rumour
+module Vignette
   class Connection
     def initialize(address)
       @local_address = address

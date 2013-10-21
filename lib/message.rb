@@ -1,4 +1,4 @@
-module Rumour
+module Vignette
   class Message
     attr_reader :key, :vector, :ttl
 

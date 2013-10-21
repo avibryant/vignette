@@ -1,4 +1,4 @@
-module Rumour
+module Vignette
   class UDP
     MAXLEN = 1500
 

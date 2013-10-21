@@ -1,4 +1,4 @@
-module Rumour
+module Vignette
   class Actor
     def initialize(address, db, &send)
       @address = address

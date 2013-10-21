@@ -1,4 +1,4 @@
-module Rumour
+module Vignette
   class DB
     def initialize
       @store = {}

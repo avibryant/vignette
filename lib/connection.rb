@@ -1,28 +1,43 @@
 module Rumour
-  class UDPConnection
-    def initialize(address, protocol)
-      @protocol = protocol
-      @socket = UDPSocket.new
-      ip, port = split_address(address)
-      @socket.bind(ip, port)
+  class Connection
+    def initialize(address)
+      @local_address = address
+      @db = DB.new
+      @udp = UDP.new(@local_address)
+      @actor = Actor.new(@local_address, @db) do |message,addr|
+        unless(addr == @local_address || message.ttl <= 0)
+          log(message, "->", addr)
+          @udp.send(message, addr)
+        end
+      end
     end
 
-    def receive_from
-      bytes, addr = @socket.recvfrom(@protocol.max_len)
-      message = @protocol.from_bytes(bytes)
-      from_address = "#{addr[3]}:#{addr[1]}"
-      [message, from_address]
+    def start
+      Thread.new{listen}
     end
 
-    def send_to(message, address)
-      bytes = @protocol.to_bytes(message)
-      ip, port = split_address(address)
-      @socket.send(bytes, 0, ip, port)
+    def listen
+      loop do
+        message, from_address = @udp.receive
+        log(message, "<-", from_address)
+        @actor.receive(message, from_address)
+      end
     end
 
-    def split_address(address)
-      ip, port = address.split(":")
-      [ip, port.to_i]
+    def update(key, vector)
+      @actor.update(Message.new(key, vector), @local_address)
+    end
+
+    def lookup(key)
+      @db.lookup(key)
+    end
+
+    def bootstrap(remote_address)
+      @actor.bootstrap(remote_address)
+    end
+
+    def log(message, action, address)
+#      puts "#{message} #{action} #{address}"
     end
   end
 end

@@ -1,5 +1,5 @@
 module Rumour
-  class Cache
+  class DB
     def initialize
       @store = {}
     end

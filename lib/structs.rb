@@ -1,19 +1,5 @@
 module Rumour
-  Address = Struct.new(:ip, :port)
-  Envelope = Struct.new(:source, :ttl, :message)
-  Message = Struct.new(:key, :vector)
-
-  class Address
-    def to_s
-      "#{ip}:#{port}"
-    end
-  end
-
-  class Envelope
-    def to_s
-      "<#{source} #{message} #{ttl}>"
-    end
-  end
+  Message = Struct.new(:key, :vector, :ttl)
 
   class Message
     #update this message to incorporate other as needed
@@ -43,7 +29,7 @@ module Rumour
     end
 
     def to_s
-      "#{key}=#{vector.inspect}"
+      "[#{key}: #{vector.inspect} | #{ttl}]"
     end
   end
 end

@@ -1,21 +1,71 @@
 module Rumour
   class Cache
-    attr_reader :messages
-
     def initialize
-      @messages = {}
+      @store = {}
     end
 
-    def update(message)
-      if(current = @messages[message.key])
-        if(message.vector.empty?)
-          [nil, current]
-        else
-          current.merge!(message)
-        end
+    def keys
+      @store.keys
+    end
+
+    def query(key, vector)
+#      puts "Query: #{key}: #{vector.inspect}"
+      case key
+      when /[*]/
+        aggregate_query(key, vector)
+      when /%/
+        search_query(key, vector)
       else
-        @messages[message.key] = message
-        [message, nil]
+        simple_query(key, vector)
+      end
+    end
+
+    def simple_query(key, vector)
+      result = {}
+      if(current = @store[key])
+        if(vector.empty?)
+          result = current
+        else
+          vector.each do |i,n|
+            if((v = current[i]) && n < v)
+              result[i] = v
+            end
+          end
+        end
+      end
+
+      if(result.empty?)
+        {}
+      else
+        {key => result}
+      end
+    end
+
+    def search_query(key, vector)
+      regex = /#{key.gsub(".", "[.]").gsub("%", ".*")}/
+      results = {}
+      keys.each do |k|
+        if k =~ regex
+          results.merge!(query(k, vector))
+        end
+      end
+      results
+    end
+
+    def update(key, vector)
+      return {} if key =~ /%/
+      if(current = @store[key])
+        updates = {}
+        vector.each do |i,n|
+          if(n > (current[i] || 0))
+            current[i] = n
+            updates[i] = n
+          end
+        end
+        updates
+      else
+        @store[key] = vector
+        vector
       end
     end
   end

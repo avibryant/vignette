@@ -5,10 +5,10 @@ module Rumour
     def initialize(address)
       @local_address = address
       @connection = UDPConnection.new(@local_address, MarshalProtocol.new)
-      @node = Node.new(@local_address) do |envelope,addr|
-        unless(addr == @local_address || envelope.ttl <= 0)
-          log(envelope, "->", addr)
-          @connection.send_to(envelope, addr)
+      @actor = Actor.new(@local_address) do |message,addr|
+        unless(addr == @local_address || message.ttl <= 0)
+          log(message, "->", addr)
+          @connection.send_to(message, addr)
         end
       end
     end
@@ -19,24 +19,22 @@ module Rumour
 
     def listen
       loop do
-        envelope, from_address = @connection.receive_from
-        log(envelope, "<-", from_address)
-        @node.receive(envelope, from_address)
+        message, from_address = @connection.receive_from
+        log(message, "<-", from_address)
+        @actor.receive(message, from_address)
       end
     end
 
     def update(key, vector)
-      message = Message.new(key, vector)
-      envelope = Envelope.new(@local_address, TTL, message)
-      @node.receive(envelope, @local_address)
+      @actor.update(Message.new(key, vector, TTL), @local_address)
     end
 
     def bootstrap(remote_address)
-      @node.bootstrap(remote_address)
+      @actor.bootstrap(remote_address)
     end
 
-    def log(envelope, action, address)
-      puts "#{envelope} #{action} #{address}"
+    def log(message, action, address)
+      puts "#{message} #{action} #{address}"
     end
   end
 end

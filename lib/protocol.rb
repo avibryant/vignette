@@ -5,8 +5,8 @@ module Rumour
       1500
     end
 
-    def to_bytes(envelope)
-      Marshal.dump(envelope)
+    def to_bytes(message)
+      Marshal.dump(message)
     end
 
     def from_bytes(bytes)

@@ -4,11 +4,11 @@ require 'lib/rumour'
 
 include Rumour
 
-port = ARGV.shift.to_i
-seed = ARGV.shift.to_i
+address = ARGV.shift
+seed = ARGV.shift
 
-daemon = Daemon.new(Address.new("127.0.0.1", port))
-daemon.bootstrap(Address.new("127.0.0.1", seed))
+daemon = Daemon.new(address)
+daemon.bootstrap(seed)
 daemon.start
 loop do
   n = rand(1000)

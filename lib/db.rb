@@ -4,15 +4,7 @@ module Rumour
       @store = {}
     end
 
-    def keys
-      @store.keys
-    end
-
-    def lookup(key)
-      @store[key] || {}
-    end
-
-    def query(key, vector)
+    def query(key, vector = {})
 #      puts "Query: #{key}: #{vector.inspect}"
       case key
       when /[*]/
@@ -48,7 +40,7 @@ module Rumour
     def search_query(key, vector)
       regex = /#{key.gsub(".", "[.]").gsub("%", ".*")}/
       results = {}
-      keys.each do |k|
+      @store.keys.each do |k|
         if k =~ regex
           results.merge!(query(k, vector))
         end

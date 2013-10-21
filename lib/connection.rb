@@ -29,7 +29,7 @@ module Rumour
     end
 
     def lookup(key)
-      @db.lookup(key)
+      @db.query(key)[key] || {}
     end
 
     def bootstrap(remote_address)

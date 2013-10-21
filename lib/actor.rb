@@ -7,7 +7,7 @@ module Rumour
     end
 
     def neighbours
-      @db.keys.map{|ea| $1 if ea =~ /^n:(.*)/}.compact
+      @db.query("n:%").keys.map{|ea| $1 if ea =~ /^n:(.*)/}.compact
     end
 
     def bootstrap(neighbour)
@@ -32,10 +32,6 @@ module Rumour
           @send.call(Message.new(message.key, updates, message.ttl - 1), neighbour)
         end
       end
-    end
-
-    def lookup(key)
-      @db.lookup(key)
     end
 
     def pick_neighbour(exclude)

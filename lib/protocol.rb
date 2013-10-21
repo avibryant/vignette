@@ -1,4 +1,6 @@
 module Rumour
+  Message = Struct.new(:key, :vector, :ttl)
+
   class MarshalProtocol
 
     def max_len

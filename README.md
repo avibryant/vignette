@@ -37,7 +37,7 @@ There are a number of useful data structures that can be built directly on top o
   - HyperLogLog for efficiently estimating unique values in a set
   - Min-Hash signatures for estimating set similarities
   - Bloom filters for estimating set membership
-  - Vector clocks for maintaining distributed counters
+  - Vector clocks for maintaining exact distributed counters
 
 Of these, Vignette has been most tuned for use with HyperLogLog, and this is likely the most practical application. However, it's important to note that this is purely a question of how the client code interprets the data; the database itself does not know or care anything about any of these specific uses.
 
@@ -84,5 +84,9 @@ Note that the second step could (in fact usually will) cause a wildcarded messag
 ### Peers ###
 A key that starts with "n:" represents the last known time a message has been observed from a given sender. Each node will synthesize one of these messages to itself whenever it receives a message from another node. The format of the key is "n:host:port", and the vector should have a single element which is the unix timestamp, rounded to the nearest minute. These messages follow the normal rules for forwarding and so will propagate throughout the network. A node will use these keys to decide which other nodes are active and should be used when sending out updates.
 
-When first starting up, as long as a node knows about and can reach any other node, it can send a "n:%" message to that node to announce itself and bootstrap knowledge of the network.
+When first starting up, as long as a node knows about and can reach any other node, it can send a "n:%" message to that node to announce itself and bootstrap knowledge of the network. It's possible this should involve multicast or broadcast somehow instead of an explicit seed node, but I don't think it's impractical to have a few well known addresses that a joining node can try to contact.
 
+Persistence
+-----------
+
+Any given node should manage its storage however it likes. Some nodes will in fact be client libraries loaded into other processes that are generating events, and so might only store a handful of keys as an optimization, to avoid sending out needless messages. Some nodes might store as many keys as they can in memory, expiring them randomly or with a LRU policy, but not persist anything. Some nodes might periodically dump their state to disk, or use LevelDB as a backing store, etc, etc. The overall system is simple enough that it should be possible to have a great many such implementations, all interoperable, and construct heterogenous networks of them according to need.

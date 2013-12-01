@@ -11,11 +11,8 @@ conn = Connection.new(address)
 conn.bootstrap(seed)
 conn.start
 
-id = rand(10)
-i = 1
 loop do
-  conn.update("count", {id=>i})
+  conn.update("hll", HyperLogLog.vector(rand))
   sleep(1)
-  puts "COUNT: #{conn.lookup("count").values.inject(0){|a,b| a+b}}"
-  i += 1
+  puts "COUNT: #{HyperLogLog.estimate(conn.lookup("hll"))}"
 end
